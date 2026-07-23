@@ -1,122 +1,36 @@
-// 1. เรียกใช้งาน Module 'http'
 const http = require('http');
-
-// 2. กำหนด Port
-const port = process.env.PORT || 3000;
-
-// 3. สร้าง Server
-const server = http.createServer((req, res) => {
-
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-
-    res.end(`
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<title>My Web Server</title>
-
-<style>
-    body{
-        margin:0;
-        font-family: "Kanit", sans-serif;
-        background: linear-gradient(135deg,#FFE5EC,#FFF8DC,#E0F7FA);
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-    }
-
-    .card{
-        background:white;
-        width:500px;
-        padding:30px;
-        border-radius:25px;
-        text-align:center;
-        box-shadow:0 10px 25px rgba(0,0,0,.2);
-    }
-
-    .cat{
-        font-size:90px;
-        animation: jump 1s infinite alternate;
-    }
-
-    @keyframes jump{
-        from{transform:translateY(0);}
-        to{transform:translateY(-15px);}
-    }
-
-    h1{
-        color:#ff69b4;
-    }
-
-    p{
-        color:#555;
-        font-size:18px;
-    }
-
-    .footer{
-        margin-top:20px;
-        color:#888;
-        font-size:15px;
-    }
-
-    button{
-        margin-top:20px;
-        background:#ffb6c1;
-        color:white;
-        border:none;
-        padding:12px 25px;
-        border-radius:20px;
-        font-size:16px;
-        cursor:pointer;
-    }
-
-    button:hover{
-        background:#ff69b4;
-    }
-</style>
-</head>
-
-<body>
-
-<div class="card">
-
-    <div class="cat">🐱</div>
-
-    <h1>สวัสดีครับ!</h1>
-
-    <h2>Web Server ของ</h2>
-
-    <h2 style="color:#ff69b4;">
-        นางสาวขวัญศิริ ใจหมั่น
-    </h2>
-
-    <p>
-        รหัสนักศึกษา : <b>69319010096</b>
-    </p>
-
-    <p>
-        🎉 เครื่องแม่ข่ายทำงานปกติบนระบบ Railway แล้วครับ 🎉
-    </p>
-
-    <button onclick="alert('เหมียว~ 😺 ยินดีต้อนรับเข้าสู่ Web Server')">
-        🐾 กดทักทายแมว
-    </button>
-
-    <div class="footer">
-        ❤️ Made with Node.js & Railway ❤️
-    </div>
-
-</div>
-
-</body>
-</html>
-`);
+// 1. เรียกใชงาน Pool จากไลบรารี pg สําหรับจัดการการเชื่อมตอฐานขอมูล
+const { Pool } = require('pg');
+// 2. ตั้งคาการเชื่อมตอ โดยดึง URL มาจาก Environment Variable ของ Railway
+const pool = new Pool({
+connectionString: process.env.DATABASE_URL,
 });
+const port = process.env.PORT || 3000;
+const server = http.createServer(async (req, res) => {
+res.statusCode = 200;
+res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
-// 4. เปิด Server
+try {
+// 3. ขอเชื่อมตอและสงคําสั่ง SQL ไปดึงขอมูลจากตาราง students
+const client = await pool.connect();
+const result = await client.query('SELECT * FROM students');
+client.release(); // คนืการเชื่อมตอเมื่อใชงานเสร็จ
+// 4. นําขอมูลที่ได(result.rows) มาประกอบเปนตาราง HTML
+let html = `<h1>ฐานขอมูลนักศึกษา (ทดสอบการเชื่อมตอ)</h1>`;
+html += `<table border="1" cellpadding="10">`;
+html += `<tr><th>รหัสนักศึกษา</th><th>ชื่อ-นามสกุล</th></tr>`;
+// วนลูปนําขอมูลแตละแถวมาแสดง
+result.rows.forEach(row => {
+html += `<tr><td>${row.student_id}</td><td>${row.student_name}</td></tr>`;
+});
+html += `</table>`;
+res.end(html);
+} catch (err) {
+// กรณเีชื่อมตอไมไดหรือเขียนชื่อตารางผิด
+console.error(err);
+res.end(`<h1>เกิดขอผิดพลาด!</h1><p>${err.message}</p>`);
+}
+});
 server.listen(port, () => {
-    console.log(`Server is running! เครื่องแม่ข่ายเปิดทำงานแล้วที่ช่องทาง: ${port}`);
+console.log(`Server is running on port: ${port}`);
 });
