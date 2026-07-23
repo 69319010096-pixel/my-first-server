@@ -1,23 +1,122 @@
-// 1. เรียกใชงาน Module ที่ชื่อวา 'http' ซึ่งเปนระบบพื้นฐานของ Node.js สําหรับทําเซิรฟ เวอร
- const http = require('http');
+// 1. เรียกใช้งาน Module 'http'
+const http = require('http');
 
- // 2. กําหนดชองทาง (Port) ที่เซิรฟเวอรจะใชสื่อสาร โดยใหใชของที่ Cloud กําหนดมา(process.env.PORT) ถาไมมีใหใช 3000
- const port = process.env.PORT || 3000;
+// 2. กำหนด Port
+const port = process.env.PORT || 3000;
 
- // 3. สรางเครื่องแมขาย (Server) ที่คอยรับคําขอ (req) และตอบกลับ (res)
- const server = http.createServer((req, res) => {
+// 3. สร้าง Server
+const server = http.createServer((req, res) => {
 
- // 3.1 ตั้งรหัสสถานะ 200 หมายถึง "ทํางานสําเร็จ (OK)"
- res.statusCode = 200;
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
 
- // 3.2 บอกเบราวเซอรของผูใชวา สิ่งที่สงกลับไปคือไฟลขอความแบบ HTML และรองรับภาษาไทย (utf-8)
- res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.end(`
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>My Web Server</title>
 
-// 3.3 สงขอมูลหนาเว็บกลับไปหาผูใช (*** ใหนักศึกษาแกชื่อ-นามสกุลตรงนี้ ***)
-res.end('<h1>สวัสดีครับ! นี่คือ Web Server ของ นางสาวขวัญศิริ ใจหมั่น รหัสนักศึกษา 69319010096 </h1><p>เครื่องแม่ข่ายทํางานปกติบนระบบ Railway แล้วครับผม!</p>');
- });
+<style>
+    body{
+        margin:0;
+        font-family: "Kanit", sans-serif;
+        background: linear-gradient(135deg,#FFE5EC,#FFF8DC,#E0F7FA);
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+    }
 
- // 4. สั่งใหเซิรฟเวอรเริ่มตนเปดรับฟงการเชื่อมตอตาม Port ที่กําหนดไว
- server.listen(port, () => {
- console.log(`Server is running! เครื่องแม่ข่ายเปิดทํางานแล้วที่ช่องทาง: ${port}`);
- });
+    .card{
+        background:white;
+        width:500px;
+        padding:30px;
+        border-radius:25px;
+        text-align:center;
+        box-shadow:0 10px 25px rgba(0,0,0,.2);
+    }
+
+    .cat{
+        font-size:90px;
+        animation: jump 1s infinite alternate;
+    }
+
+    @keyframes jump{
+        from{transform:translateY(0);}
+        to{transform:translateY(-15px);}
+    }
+
+    h1{
+        color:#ff69b4;
+    }
+
+    p{
+        color:#555;
+        font-size:18px;
+    }
+
+    .footer{
+        margin-top:20px;
+        color:#888;
+        font-size:15px;
+    }
+
+    button{
+        margin-top:20px;
+        background:#ffb6c1;
+        color:white;
+        border:none;
+        padding:12px 25px;
+        border-radius:20px;
+        font-size:16px;
+        cursor:pointer;
+    }
+
+    button:hover{
+        background:#ff69b4;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="cat">🐱</div>
+
+    <h1>สวัสดีครับ!</h1>
+
+    <h2>Web Server ของ</h2>
+
+    <h2 style="color:#ff69b4;">
+        นางสาวขวัญศิริ ใจหมั่น
+    </h2>
+
+    <p>
+        รหัสนักศึกษา : <b>69319010096</b>
+    </p>
+
+    <p>
+        🎉 เครื่องแม่ข่ายทำงานปกติบนระบบ Railway แล้วครับ 🎉
+    </p>
+
+    <button onclick="alert('เหมียว~ 😺 ยินดีต้อนรับเข้าสู่ Web Server')">
+        🐾 กดทักทายแมว
+    </button>
+
+    <div class="footer">
+        ❤️ Made with Node.js & Railway ❤️
+    </div>
+
+</div>
+
+</body>
+</html>
+`);
+});
+
+// 4. เปิด Server
+server.listen(port, () => {
+    console.log(`Server is running! เครื่องแม่ข่ายเปิดทำงานแล้วที่ช่องทาง: ${port}`);
+});
